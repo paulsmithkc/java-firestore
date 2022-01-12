@@ -1694,6 +1694,11 @@ public class Query {
     return false;
   }
 
+  @Nonnull
+  public AggregateQuery aggregate(@Nonnull FieldPath... fields) {
+    return null;
+  }
+
   /**
    * Returns true if this Query is equal to the provided object.
    *
