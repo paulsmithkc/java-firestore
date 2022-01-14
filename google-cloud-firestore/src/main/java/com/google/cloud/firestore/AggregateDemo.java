@@ -6,6 +6,7 @@ import static com.google.cloud.firestore.AggregateField.max;
 import static com.google.cloud.firestore.AggregateField.min;
 import static com.google.cloud.firestore.FieldPath.documentId;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -93,7 +94,7 @@ public class AggregateDemo {
       AggregateSnapshot snapshot = query.aggregate(count(), last(documentId())).get().get();
       Long count = snapshot.getLong(count());
       if (count == null) {
-        throw new NullPointerException("count should never be null");
+        throw new NullPointerException("this should never happen");
       }
 
       playerCount += count;
@@ -107,6 +108,53 @@ public class AggregateDemo {
     }
 
     System.out.println("There are " + playerCount + " players");
+  }
+
+  public static void Demo9B_ResumeTokensWithGroupBy(Firestore db) throws Exception {
+    Query baseQuery = db.collectionGroup("players").limit(1000).orderBy(documentId());
+    HashMap<String, Long> countByCountry = new HashMap<>();
+
+    Query query = baseQuery;
+    while (true) {
+      GroupBySnapshot snapshot = query.groupBy("country").aggregate(count(), last(documentId())).get().get();
+      long curTotalCount = 0;
+      String lastDocumentId = null;
+
+      for (AggregateSnapshot group : snapshot.getGroups()) {
+        String country = group.getString("country");
+        Long count = group.getLong(count());
+        if (country == null || count == null) {
+          throw new NullPointerException("this should never happen");
+        }
+
+        if (countByCountry.containsKey(country)) {
+          countByCountry.put(country, countByCountry.get(country) + count);
+        } else {
+          countByCountry.put(country, count);
+        }
+
+        curTotalCount += count;
+
+        // NOTE: last(documentId()) will be exactly the same for all groups; it just gets repeated
+        // in each group.
+        lastDocumentId = group.getString(last(documentId()));
+        if (lastDocumentId == null) {
+          if (curTotalCount > 0) {
+            throw new AssertionError("lastDocumentId should only be null if no documents were scanned");
+          }
+        }
+      }
+
+      if (curTotalCount < 1000) {
+        break;
+      }
+
+      query = baseQuery.startAfter(lastDocumentId);
+    }
+
+    for (String country : countByCountry.keySet()) {
+      System.out.println(country + " has " + countByCountry.get(country) + " players");
+    }
   }
 
   public static void Demo10_Max(Firestore db) throws Exception {
