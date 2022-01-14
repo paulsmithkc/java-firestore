@@ -3,6 +3,7 @@ package com.google.cloud.firestore;
 import com.google.cloud.Timestamp;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -16,7 +17,7 @@ public interface AggregateSnapshot {
   Timestamp getReadTime();
 
   @Nullable
-  Map<FieldPath, Object> getData();
+  Map<AggregateSnapshotKey, Object> getData();
 
   // Question: Is it worthwhile to provide "contains" since all of the keys are
   // explicitly specified when the aggregate query is created?
@@ -25,7 +26,8 @@ public interface AggregateSnapshot {
   boolean contains(@Nonnull AggregateField field);
 
   // Question: Should we support custom object mapping? I think no, at least
-  // in the initial release.
+  // in the initial release. If yes, we could add new some annotations for
+  // aggregate fields.
   <T> T toObject(@Nonnull Class<T> valueType);
 
   @Nullable
@@ -102,4 +104,54 @@ public interface AggregateSnapshot {
 
   @Override
   int hashCode();
+
+  final class AggregateSnapshotKey {
+
+    private final FieldPath fieldPath;
+    private final AggregateField aggregateField;
+
+    public AggregateSnapshotKey(@Nonnull FieldPath fieldPath) {
+      this.fieldPath = fieldPath;
+      this.aggregateField = null;
+    }
+
+    public AggregateSnapshotKey(@Nonnull String field) {
+      this.fieldPath = FieldPath.fromDotSeparatedString(field);
+      this.aggregateField = null;
+    }
+
+    public AggregateSnapshotKey(@Nonnull AggregateField aggregateField) {
+      this.fieldPath = null;
+      this.aggregateField = aggregateField;
+    }
+
+    @Nullable
+    public FieldPath getFieldPath() {
+      return fieldPath;
+    }
+
+    @Nullable
+    public AggregateField getAggregateField() {
+      return aggregateField;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      AggregateSnapshotKey that = (AggregateSnapshotKey) o;
+      return Objects.equals(fieldPath, that.fieldPath) &&
+          Objects.equals(aggregateField, that.aggregateField);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(fieldPath, aggregateField);
+    }
+
+  }
 }

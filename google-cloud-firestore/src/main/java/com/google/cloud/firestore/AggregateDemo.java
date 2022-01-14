@@ -1,0 +1,159 @@
+package com.google.cloud.firestore;
+
+import static com.google.cloud.firestore.AggregateField.count;
+import static com.google.cloud.firestore.AggregateField.last;
+import static com.google.cloud.firestore.AggregateField.max;
+import static com.google.cloud.firestore.AggregateField.min;
+import static com.google.cloud.firestore.FieldPath.documentId;
+
+import java.util.List;
+import java.util.Objects;
+
+public class AggregateDemo {
+
+  public static void Demo1_CountOfDocumentsInACollection(Firestore db) throws Exception {
+    Query query = db.collection("games").document("halo").collection("players");
+    AggregateSnapshot snapshot = query.aggregate(count()).get().get();
+    assertEqual(snapshot.getLong(count()), 5_000_000);
+  }
+
+  public static void Demo2_GroupBySupport(Firestore db) throws Exception {
+    Query query = db.collectionGroup("players").whereEqualTo("state", "active");
+    GroupBySnapshot snapshot = query.groupBy("game").aggregate(count()).get().get();
+    assertEqual(snapshot.size(), 3);
+    List<AggregateSnapshot> groups = snapshot.getGroups();
+    assertEqual(groups.get(0).getString("game"), "cyber_punk");
+    assertEqual(groups.get(0).getLong(count()), 5);
+    assertEqual(groups.get(1).getString("game"), "halo");
+    assertEqual(groups.get(1).getLong(count()), 55);
+    assertEqual(groups.get(2).getString("game"), "mine_craft");
+    assertEqual(groups.get(2).getLong(count()), 5_000_000);
+  }
+
+  public static void Demo3_FieldRenamingAliasing() {
+    // Aliasing / renaming of aggregations is not exposed from the API surface.
+    // I've requested that the proto allow non-aggregate fields to also be
+    // aliased so that the implementation of the Firestore clients can rename
+    // both aggregate and non-aggregate fields to guarantee that there is NEVER
+    // a conflict.
+  }
+
+  public static void Demo4_LimitTheNumberOfDocumentsScanned(Firestore db) throws Exception {
+    // Limit the work / documents scanned by restricting underlying query.
+    Query query = db.collection("games").document("halo").collection("players").limit(1000);
+    AggregateSnapshot snapshot = query.aggregate(count()).get().get();
+    assertEqual(snapshot.getLong(count()), 1000);
+  }
+
+  public static void Demo5_LimitAggregationBuckets(Firestore db) throws Exception {
+    Query query = db.collectionGroup("players");
+    GroupBySnapshot snapshot = query.groupBy("game").withMaxGroups(1).startingAtGroupOffset(1).aggregate(count()).get().get();
+    assertEqual(snapshot.size(), 1);
+    AggregateSnapshot aggregateSnapshot = snapshot.getGroups().get(0);
+    assertEqual(aggregateSnapshot.getString("game"), "halo");
+    assertEqual(aggregateSnapshot.getLong(count()), 55);
+  }
+
+  public static void Demo6_LimitWorkPerAggregationBucket(Firestore db) throws Exception {
+    Query query = db.collection("games").document("halo").collection("players");
+    GroupBySnapshot snapshot = query.groupBy("game").aggregate(count().withMaxCount(50)).get().get();
+    assertEqual(snapshot.size(), 3);
+    List<AggregateSnapshot> groups = snapshot.getGroups();
+    assertEqual(groups.get(0).getString("game"), "cyber_punk");
+    assertEqual(groups.get(0).getLong(count()), 5);
+    assertEqual(groups.get(1).getString("game"), "halo");
+    assertEqual(groups.get(1).getLong(count()), 50); // count is capped at 50
+    assertEqual(groups.get(2).getString("game"), "mine_craft");
+    assertEqual(groups.get(2).getLong(count()), 50); // count is capped at 50
+  }
+
+
+  public static void Demo7_OffsetOnNonGroupByQuery() {
+    // The API does not provide a way to specify an offset for a non-group-by query.
+  }
+
+  public static void Demo8_PaginationOverAggregationBuckets(Firestore db) throws Exception {
+    Query query = db.collectionGroup("players").whereEqualTo("state", "active");
+        // .orderBy("game") is implied by the group by
+    GroupBySnapshot snapshot = query.groupBy("game").startingAfterGroup("cyber_punk").aggregate(count()).get().get();
+    assertEqual(snapshot.size(), 2);
+    List<AggregateSnapshot> groups = snapshot.getGroups();
+    assertEqual(groups.get(0).getString("game"), "halo");
+    assertEqual(groups.get(0).getLong(count()), 50); // count is capped at 50
+    assertEqual(groups.get(1).getString("game"), "mine_craft");
+    assertEqual(groups.get(1).getLong(count()), 50); // count is capped at 50
+  }
+
+  public static void Demo9_ResumeTokens(Firestore db) throws Exception {
+    Query baseQuery = db.collectionGroup("players").limit(1000).orderBy(documentId());
+    long playerCount = 0;
+
+    Query query = baseQuery;
+    while (true) {
+      AggregateSnapshot snapshot = query.aggregate(count(), last(documentId())).get().get();
+      Long count = snapshot.getLong(count());
+      if (count == null) {
+        throw new NullPointerException("count should never be null");
+      }
+
+      playerCount += count;
+      if (count < 1000) {
+        break;
+      }
+
+      // NOTE: If count==0 then snapshot.getString(last(documentId())) returns null.
+      String lastDocumentId = snapshot.getString(last(documentId()));
+      query = baseQuery.startAfter(lastDocumentId);
+    }
+
+    System.out.println("There are " + playerCount + " players");
+  }
+
+  public static void Demo10_Max(Firestore db) throws Exception {
+    Query query = db.collectionGroup("matches").whereEqualTo("game", "halo").orderBy("user");
+    GroupBySnapshot snapshot = query.groupBy("user").aggregate(max("timestamp")).get().get();
+    assertEqual(snapshot.size(), 2);
+    List<AggregateSnapshot> groups = snapshot.getGroups();
+    assertEqual(groups.get(0).getString("user"), "alice");
+    assertEqual(groups.get(0).getString(max("timestamp")), "2022-01-06");
+    assertEqual(groups.get(1).getString("user"), "bob");
+    assertEqual(groups.get(1).getString(max("timestamp")), "2021-12-24");
+  }
+
+  public static void Demo11_MultipleAggregations(Firestore db) throws Exception {
+    Query query = db.collectionGroup("matches").whereEqualTo("game", "halo").orderBy("user");
+    GroupBySnapshot snapshot = query.groupBy("user").aggregate(min("score"), max("score")).get().get();
+    assertEqual(snapshot.size(), 2);
+    List<AggregateSnapshot> groups = snapshot.getGroups();
+    assertEqual(groups.get(0).getString("user"), "alice");
+    assertEqual(groups.get(0).getLong(min("score")), 0);
+    assertEqual(groups.get(0).getLong(max("score")), 500);
+    assertEqual(groups.get(1).getString("user"), "bob");
+    assertEqual(groups.get(1).getLong(min("score")), 50);
+    assertEqual(groups.get(1).getLong(max("score")), 250);
+  }
+
+  private static void assertEqual(Long num1, Long num2) {
+    if (!Objects.equals(num1, num2)) {
+      throw new AssertionError("num1!=num2");
+    }
+  }
+
+  private static void assertEqual(Long num1, int num2) {
+    assertEqual(num1, Long.valueOf(num2));
+  }
+
+  private static void assertEqual(Integer num1, Integer num2) {
+    if (!Objects.equals(num1, num2)) {
+      throw new AssertionError("num1!=num2");
+    }
+  }
+
+  private static void assertEqual(String num1, String num2) {
+    if (!Objects.equals(num1, num2)) {
+      throw new AssertionError("num1!=num2");
+    }
+  }
+
+}
+

@@ -9,8 +9,7 @@ public interface AggregateQuery {
   @Nonnull
   Query getQuery();
 
-  @Nonnull
-  FieldPath[] getAggregateFields();
+
 
   @Nonnull
   ApiFuture<AggregateSnapshot> get();
