@@ -1,6 +1,7 @@
 package com.google.cloud.firestore;
 
 import com.google.api.core.ApiFuture;
+import com.google.api.gax.rpc.ApiStreamObserver;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 
@@ -34,6 +35,8 @@ public interface GroupByQuery {
   // will be specified to aggregate(), which returns a new object. The only case for calling get()
   // or addSnapshotListener() on this class would be to get the distinct set of combinations of the
   // fields being grouped.
+
+  void stream(@Nonnull final ApiStreamObserver<GroupBySnapshot> responseObserver);
 
   @Nonnull
   ApiFuture<GroupBySnapshot> get();

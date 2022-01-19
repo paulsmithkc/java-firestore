@@ -1,6 +1,7 @@
 package com.google.cloud.firestore;
 
 import com.google.api.core.ApiFuture;
+import com.google.api.gax.rpc.ApiStreamObserver;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 
@@ -9,7 +10,7 @@ public interface AggregateQuery {
   @Nonnull
   Query getQuery();
 
-
+  void stream(@Nonnull final ApiStreamObserver<AggregateSnapshot> responseObserver);
 
   @Nonnull
   ApiFuture<AggregateSnapshot> get();
