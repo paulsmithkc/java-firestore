@@ -19,7 +19,13 @@ public interface GroupByQuery {
   GroupByQuery startingAtGroupOffset(long groupOffset);
 
   @Nonnull
+  GroupByQuery startingAtGroup(@Nonnull Object value, @Nonnull Object... values);
+
+  @Nonnull
   GroupByQuery startingAfterGroup(@Nonnull Object value, @Nonnull Object... values);
+
+  @Nonnull
+  GroupByQuery endingAtGroup(@Nonnull Object value, @Nonnull Object... values);
 
   @Nonnull
   GroupByQuery endingBeforeGroup(@Nonnull Object value, @Nonnull Object... values);
