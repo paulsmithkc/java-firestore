@@ -21,6 +21,9 @@ public interface GroupByQuery {
   @Nonnull
   GroupByQuery startingAfterGroup(@Nonnull Object value, @Nonnull Object... values);
 
+  @Nonnull
+  GroupByQuery endingBeforeGroup(@Nonnull Object value, @Nonnull Object... values);
+
   // Question: This interface will almost always be used as an intermediary because the aggregations
   // will be specified to aggregate(), which returns a new object. The only case for calling get()
   // or addSnapshotListener() on this class would be to get the distinct set of combinations of the
