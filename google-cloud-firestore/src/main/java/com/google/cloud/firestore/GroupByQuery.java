@@ -16,6 +16,13 @@ public interface GroupByQuery {
   @Nonnull
   GroupByQuery groupLimit(int maxGroups);
 
+  // Question: Do we want to support group-by "limitToLast" queries? In the Query class this is
+  // implemented entirely client side by issuing the requested query with inverted order-by. We
+  // would need to verify at runtime that the underlying query has the correct order-by clause and
+  // possibly invert first/last aggregations to maintain their expected semantics.
+  @Nonnull
+  GroupByQuery groupLimitToLast(int maxGroups);
+
   @Nonnull
   GroupByQuery groupOffset(long groupOffset);
 
