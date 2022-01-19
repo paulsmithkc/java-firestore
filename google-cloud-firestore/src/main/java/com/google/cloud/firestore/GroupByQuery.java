@@ -13,22 +13,22 @@ public interface GroupByQuery {
   GroupByAggregateQuery aggregate(@Nonnull AggregateField field, @Nonnull AggregateField... fields);
 
   @Nonnull
-  GroupByQuery withMaxGroups(int maxGroups);
+  GroupByQuery groupLimit(int maxGroups);
 
   @Nonnull
-  GroupByQuery startingAtGroupOffset(long groupOffset);
+  GroupByQuery groupOffset(long groupOffset);
 
   @Nonnull
-  GroupByQuery startingAtGroup(@Nonnull Object value, @Nonnull Object... values);
+  GroupByQuery startAtGroup(@Nonnull Object value, @Nonnull Object... values);
 
   @Nonnull
-  GroupByQuery startingAfterGroup(@Nonnull Object value, @Nonnull Object... values);
+  GroupByQuery startAfterGroup(@Nonnull Object value, @Nonnull Object... values);
 
   @Nonnull
-  GroupByQuery endingAtGroup(@Nonnull Object value, @Nonnull Object... values);
+  GroupByQuery endAtGroup(@Nonnull Object value, @Nonnull Object... values);
 
   @Nonnull
-  GroupByQuery endingBeforeGroup(@Nonnull Object value, @Nonnull Object... values);
+  GroupByQuery endBeforeGroup(@Nonnull Object value, @Nonnull Object... values);
 
   // Question: This interface will almost always be used as an intermediary because the aggregations
   // will be specified to aggregate(), which returns a new object. The only case for calling get()
