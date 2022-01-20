@@ -48,7 +48,7 @@ public class AggregateDemo {
 
   public static void Demo5_LimitAggregationBuckets(Firestore db) throws Exception {
     Query query = db.collectionGroup("players");
-    GroupBySnapshot snapshot = query.groupBy("game").withMaxGroups(1).startingAtGroupOffset(1).aggregate(count()).get().get();
+    GroupBySnapshot snapshot = query.groupBy("game").groupLimit(1).groupOffset(1).aggregate(count()).get().get();
     assertEqual(snapshot.size(), 1);
     AggregateSnapshot aggregateSnapshot = snapshot.getGroups().get(0);
     assertEqual(aggregateSnapshot.getString("game"), "halo");
@@ -76,7 +76,7 @@ public class AggregateDemo {
   public static void Demo8_PaginationOverAggregationBuckets(Firestore db) throws Exception {
     Query query = db.collectionGroup("players").whereEqualTo("state", "active");
         // .orderBy("game") is implied by the group by
-    GroupBySnapshot snapshot = query.groupBy("game").startingAfterGroup("cyber_punk").aggregate(count()).get().get();
+    GroupBySnapshot snapshot = query.groupBy("game").startAfterGroup("cyber_punk").aggregate(count()).get().get();
     assertEqual(snapshot.size(), 2);
     List<AggregateSnapshot> groups = snapshot.getGroups();
     assertEqual(groups.get(0).getString("game"), "halo");
