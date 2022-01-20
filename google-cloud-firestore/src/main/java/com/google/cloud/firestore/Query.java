@@ -1694,14 +1694,6 @@ public class Query {
     return false;
   }
 
-  // Question: Should we provide this convenience function? If yes, will we also provide similar
-  // convenience functions for other aggregations, like min, max, average, and sum? Also, we should
-  // mirror these convenience functions in GroupByQuery.
-  @Nonnull
-  public AggregateQuery count() {
-    return null;
-  }
-
   @Nonnull
   public AggregateQuery aggregate(@Nonnull AggregateField field, @Nonnull AggregateField... fields) {
     return null;
