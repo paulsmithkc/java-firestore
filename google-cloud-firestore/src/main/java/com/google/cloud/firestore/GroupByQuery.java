@@ -2,6 +2,10 @@ package com.google.cloud.firestore;
 
 import com.google.api.core.ApiFuture;
 import com.google.api.gax.rpc.ApiStreamObserver;
+import com.google.cloud.firestore.Query.Direction;
+import com.google.cloud.firestore.Query.FieldOrder;
+import com.google.cloud.firestore.Query.QueryOptions;
+import com.google.common.base.Preconditions;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 
@@ -49,6 +53,24 @@ public interface GroupByQuery {
 
   @Nonnull
   GroupByQuery endBeforeGroup(@Nonnull AggregateSnapshot snapshot);
+
+  @Nonnull
+  GroupByQuery orderBy(@Nonnull String groupByField);
+
+  @Nonnull
+  GroupByQuery orderBy(@Nonnull FieldPath groupByField);
+
+  @Nonnull
+  GroupByQuery orderBy(@Nonnull AggregateField aggregateField);
+
+  @Nonnull
+  GroupByQuery orderBy(@Nonnull String groupByField, @Nonnull Direction direction);
+
+  @Nonnull
+  GroupByQuery orderBy(@Nonnull FieldPath groupByField, @Nonnull Direction direction);
+
+  @Nonnull
+  GroupByQuery orderBy(@Nonnull AggregateField aggregateField, @Nonnull Direction direction);
 
   // Question: This interface will almost always be used as an intermediary because the aggregations
   // will be specified to aggregate(), which returns a new object. The only case for calling get()
