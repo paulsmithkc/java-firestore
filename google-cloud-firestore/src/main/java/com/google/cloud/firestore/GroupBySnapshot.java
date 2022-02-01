@@ -1,12 +1,9 @@
 package com.google.cloud.firestore;
 
 import com.google.cloud.Timestamp;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface GroupBySnapshot extends Iterable<AggregateSnapshot> {
 

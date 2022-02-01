@@ -1695,7 +1695,8 @@ public class Query {
   }
 
   @Nonnull
-  public AggregateQuery aggregate(@Nonnull AggregateField field, @Nonnull AggregateField... fields) {
+  public AggregateQuery aggregate(
+      @Nonnull AggregateField field, @Nonnull AggregateField... fields) {
     return null;
   }
 

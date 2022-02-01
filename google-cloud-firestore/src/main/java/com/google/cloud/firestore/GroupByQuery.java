@@ -3,9 +3,6 @@ package com.google.cloud.firestore;
 import com.google.api.core.ApiFuture;
 import com.google.api.gax.rpc.ApiStreamObserver;
 import com.google.cloud.firestore.Query.Direction;
-import com.google.cloud.firestore.Query.FieldOrder;
-import com.google.cloud.firestore.Query.QueryOptions;
-import com.google.common.base.Preconditions;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 
@@ -86,8 +83,8 @@ public interface GroupByQuery {
   ListenerRegistration addSnapshotListener(@Nonnull EventListener<GroupBySnapshot> listener);
 
   @Nonnull
-  ListenerRegistration addSnapshotListener(@Nonnull Executor executor,
-      @Nonnull EventListener<GroupBySnapshot> listener);
+  ListenerRegistration addSnapshotListener(
+      @Nonnull Executor executor, @Nonnull EventListener<GroupBySnapshot> listener);
 
   @Override
   int hashCode();
@@ -97,5 +94,4 @@ public interface GroupByQuery {
 
   @Override
   String toString();
-
 }

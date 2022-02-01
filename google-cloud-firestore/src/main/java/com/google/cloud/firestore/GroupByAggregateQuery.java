@@ -19,8 +19,8 @@ public interface GroupByAggregateQuery {
   ListenerRegistration addSnapshotListener(@Nonnull EventListener<GroupBySnapshot> listener);
 
   @Nonnull
-  ListenerRegistration addSnapshotListener(@Nonnull Executor executor,
-      @Nonnull EventListener<GroupBySnapshot> listener);
+  ListenerRegistration addSnapshotListener(
+      @Nonnull Executor executor, @Nonnull EventListener<GroupBySnapshot> listener);
 
   @Override
   int hashCode();
@@ -30,5 +30,4 @@ public interface GroupByAggregateQuery {
 
   @Override
   String toString();
-
 }

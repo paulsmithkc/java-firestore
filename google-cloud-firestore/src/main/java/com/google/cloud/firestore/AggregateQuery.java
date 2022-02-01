@@ -19,7 +19,8 @@ public interface AggregateQuery {
   ListenerRegistration addSnapshotListener(@Nonnull EventListener<AggregateSnapshot> listener);
 
   @Nonnull
-  ListenerRegistration addSnapshotListener(@Nonnull Executor executor, @Nonnull EventListener<AggregateSnapshot> listener);
+  ListenerRegistration addSnapshotListener(
+      @Nonnull Executor executor, @Nonnull EventListener<AggregateSnapshot> listener);
 
   @Override
   int hashCode();
@@ -29,5 +30,4 @@ public interface AggregateQuery {
 
   @Override
   String toString();
-
 }

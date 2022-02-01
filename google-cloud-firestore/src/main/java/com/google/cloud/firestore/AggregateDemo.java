@@ -48,7 +48,8 @@ public class AggregateDemo {
 
   public static void Demo5_LimitAggregationBuckets(Firestore db) throws Exception {
     Query query = db.collectionGroup("players");
-    GroupBySnapshot snapshot = query.groupBy("game").groupLimit(1).groupOffset(1).aggregate(count()).get().get();
+    GroupBySnapshot snapshot =
+        query.groupBy("game").groupLimit(1).groupOffset(1).aggregate(count()).get().get();
     assertEqual(snapshot.size(), 1);
     AggregateSnapshot aggregateSnapshot = snapshot.getGroups().get(0);
     assertEqual(aggregateSnapshot.getString("game"), "halo");
@@ -57,7 +58,8 @@ public class AggregateDemo {
 
   public static void Demo6_LimitWorkPerAggregationBucket(Firestore db) throws Exception {
     Query query = db.collection("games").document("halo").collection("players");
-    GroupBySnapshot snapshot = query.groupBy("game").aggregate(count().withMaxCount(50)).get().get();
+    GroupBySnapshot snapshot =
+        query.groupBy("game").aggregate(count().withMaxCount(50)).get().get();
     assertEqual(snapshot.size(), 3);
     List<AggregateSnapshot> groups = snapshot.getGroups();
     assertEqual(groups.get(0).getString("game"), "cyber_punk");
@@ -68,15 +70,15 @@ public class AggregateDemo {
     assertEqual(groups.get(2).getLong(count()), 50); // count is capped at 50
   }
 
-
   public static void Demo7_OffsetOnNonGroupByQuery() {
     // The API does not provide a way to specify an offset for a non-group-by query.
   }
 
   public static void Demo8_PaginationOverAggregationBuckets(Firestore db) throws Exception {
     Query query = db.collectionGroup("players").whereEqualTo("state", "active");
-        // .orderBy("game") is implied by the group by
-    GroupBySnapshot snapshot = query.groupBy("game").startAfterGroup("cyber_punk").aggregate(count()).get().get();
+    // .orderBy("game") is implied by the group by
+    GroupBySnapshot snapshot =
+        query.groupBy("game").startAfterGroup("cyber_punk").aggregate(count()).get().get();
     assertEqual(snapshot.size(), 2);
     List<AggregateSnapshot> groups = snapshot.getGroups();
     assertEqual(groups.get(0).getString("game"), "halo");
@@ -116,7 +118,8 @@ public class AggregateDemo {
 
     Query query = baseQuery;
     while (true) {
-      GroupBySnapshot snapshot = query.groupBy("country").aggregate(count(), last(documentId())).get().get();
+      GroupBySnapshot snapshot =
+          query.groupBy("country").aggregate(count(), last(documentId())).get().get();
       long curTotalCount = 0;
       String lastDocumentId = null;
 
@@ -140,7 +143,8 @@ public class AggregateDemo {
         lastDocumentId = group.getString(last(documentId()));
         if (lastDocumentId == null) {
           if (curTotalCount > 0) {
-            throw new AssertionError("lastDocumentId should only be null if no documents were scanned");
+            throw new AssertionError(
+                "lastDocumentId should only be null if no documents were scanned");
           }
         }
       }
@@ -170,7 +174,8 @@ public class AggregateDemo {
 
   public static void Demo11_MultipleAggregations(Firestore db) throws Exception {
     Query query = db.collectionGroup("matches").whereEqualTo("game", "halo").orderBy("user");
-    GroupBySnapshot snapshot = query.groupBy("user").aggregate(min("score"), max("score")).get().get();
+    GroupBySnapshot snapshot =
+        query.groupBy("user").aggregate(min("score"), max("score")).get().get();
     assertEqual(snapshot.size(), 2);
     List<AggregateSnapshot> groups = snapshot.getGroups();
     assertEqual(groups.get(0).getString("user"), "alice");
@@ -202,6 +207,4 @@ public class AggregateDemo {
       throw new AssertionError("num1!=num2");
     }
   }
-
 }
-
