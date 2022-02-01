@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.firestore.v1.StructuredQuery;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * A {@code FieldPath} refers to a field in a document. The path may consist of a single field name
@@ -97,6 +98,11 @@ public abstract class FieldPath extends BasePath<FieldPath> implements Comparabl
       encodedPath = canonicalString();
     }
     return encodedPath;
+  }
+
+  @Nullable
+  static FieldPath fromEncodedPath(@Nonnull String encodedPath) {
+    return null; // to be implemented
   }
 
   /** Parses a field path string into a FieldPath, treating dots as separators. */
